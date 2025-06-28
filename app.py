@@ -1,10 +1,62 @@
 from flask import Flask, request, jsonify, render_template_string
 import pickle
 import os
+import re
 
 app = Flask(__name__)
 
-# Define your models and vectorizers paths
+# ---- Negation handler and cleaning logic ----
+class NegationHandler:
+    NEG_SUFFIX = "_neg"
+    NEG_WORD_PLACEHOLDER = "neg_placeholder"
+
+    @classmethod
+    def transform(cls, text):
+        text = text.lower()
+        negation_words_patterns = [
+            r"\bnot\b", r"\bno\b", r"\bnever\b", r"\bnothing\b", r"\bnobody\b",
+            r"\bnone\b", r"\bneither\b", r"\bnor\b",
+            r"\bcan't\b", r"\bcannot\b", r"\bdon't\b", r"\bdoesn't\b", r"\bisn't\b",
+            r"\bwasn't\b", r"\bshouldn't\b", r"\bwon't\b", r"\bwouldn't\b", r"\bhadn't\b",
+            r"\bcouldn't\b"
+        ]
+        processed_text = text
+        for pattern in negation_words_patterns:
+            processed_text = re.sub(pattern, cls.NEG_WORD_PLACEHOLDER, processed_text)
+        words = processed_text.split()
+        final_words = []
+        i = 0
+        while i < len(words):
+            word = words[i]
+            if word == cls.NEG_WORD_PLACEHOLDER:
+                final_words.append(word)
+                if i + 1 < len(words):
+                    next_word = words[i+1]
+                    if re.match(r'^[a-z]+$', next_word):
+                        final_words.append(next_word + cls.NEG_SUFFIX)
+                        i += 1
+                    else:
+                        final_words.append(next_word)
+                        i += 1
+            else:
+                final_words.append(word)
+            i += 1
+        result = " ".join(final_words).replace(cls.NEG_WORD_PLACEHOLDER, "").strip()
+        result = re.sub(r'\s+', ' ', result).strip()
+        return result
+
+def clean_text(text):
+    # 1. Remove HTML tags if any
+    text = re.sub(r'<[^>]+>', '', text)
+    # 2. Apply negation transform (lowercasing + tagging)
+    text = NegationHandler.transform(text)
+    # 3. Remove unwanted chars but keep letters, numbers, spaces, underscore (for _neg)
+    text = re.sub(r'[^a-z0-9_ ]', '', text)
+    # 4. Remove extra spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+# ---- Load models and vectorizers per model ----
 MODEL_FILES = {
     "Logistic Regression": ("model/logreg_model.pkl", "model/vectorizer_logreg.pkl"),
     "Naive Bayes": ("model/nb_model.pkl", "model/vectorizer_nb.pkl"),
@@ -12,7 +64,6 @@ MODEL_FILES = {
     "Linear SVC": ("model/svc_model.pkl", "model/vectorizer_svc.pkl"),
 }
 
-# Load models and vectorizers
 models = {}
 vectorizers = {}
 
@@ -24,7 +75,7 @@ for model_name, (model_path, vec_path) in MODEL_FILES.items():
     with open(vec_path, "rb") as f:
         vectorizers[model_name] = pickle.load(f)
 
-# Headings for UI dropdown
+# ---- Headings for dropdown in UI ----
 HEADINGS = {
     "ai_powered": "🧠 AI-Powered News Sentiment Classifier",
     "decode_mood": "📰 Decode the Mood of Headlines",
@@ -38,7 +89,7 @@ HEADINGS = {
     "emotional_classifier": "📢 Emotional Classifier for News Headlines"
 }
 
-# Stylish HTML template
+# ---- Stylish HTML template ----
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -196,6 +247,7 @@ HTML_TEMPLATE = """
 </html>
 """
 
+# ---- Flask routes ----
 @app.route("/", methods=["GET", "POST"])
 def index():
     sentiment = confidence = headline = None
@@ -208,9 +260,10 @@ def index():
         headline = request.form.get("headline", "").strip()
 
         if headline:
+            cleaned_headline = clean_text(headline)
             vectorizer = vectorizers[selected_model]
             model = models[selected_model]
-            X_vec = vectorizer.transform([headline])
+            X_vec = vectorizer.transform([cleaned_headline])
             pred = model.predict(X_vec)[0]
 
             try:
@@ -245,10 +298,11 @@ def predict():
     if model_name not in models:
         return jsonify({"error": f"Model '{model_name}' not found"}), 400
 
+    cleaned_headline = clean_text(headline)
     vectorizer = vectorizers[model_name]
     model = models[model_name]
 
-    X_vec = vectorizer.transform([headline])
+    X_vec = vectorizer.transform([cleaned_headline])
     pred = model.predict(X_vec)[0]
 
     try:
@@ -267,11 +321,3 @@ def predict():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
-
-
-
