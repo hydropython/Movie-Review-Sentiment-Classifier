@@ -1,6 +1,6 @@
-# Movie review Sentiment Classifier
+# 🎬 Movie Review Sentiment Classifier
 
-A simple Flask app to classify news headline sentiment (positive/negative) using multiple classical ML models (Logistic Regression, Naive Bayes, Random Forest, Linear SVC) trained with scikit-learn and TF-IDF vectorization.
+A simple Flask app to classify movie review sentiment (positive/negative) using classical ML models — Logistic Regression, Naive Bayes, Random Forest, and Linear SVC — trained with scikit-learn and TF-IDF vectorization.
 
 ---
 
