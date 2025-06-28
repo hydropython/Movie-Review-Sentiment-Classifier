@@ -1,4 +1,4 @@
-# News Sentiment Classifier
+# Movie review Sentiment Classifier
 
 A simple Flask app to classify news headline sentiment (positive/negative) using multiple classical ML models (Logistic Regression, Naive Bayes, Random Forest, Linear SVC) trained with scikit-learn and TF-IDF vectorization.
 
