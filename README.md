@@ -18,6 +18,8 @@ A simple Flask app to classify news headline sentiment (positive/negative) using
 1. Clone the repo and install dependencies:
 
    ```bash
+   git clone <repo-url>
+   cd news-sentiment-classifier
    pip install -r requirements.txt
    ```
 2. Train models
@@ -59,3 +61,6 @@ news-sentiment-classifier/
 └── README.md                      # Project overview and usage
 
 ```
+## 🔍 App Preview
+
+![App Screenshot](./assests/Screenshot%202025-06-28%20130214.png)
