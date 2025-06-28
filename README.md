@@ -66,4 +66,4 @@ A simple Flask app to classify movie review sentiment (positive/negative) using 
 ```
 ## 🔍 App Preview
 
-![App Screenshot](./assests/Screenshot%202025-06-28%20130214.png)
+![App Screenshot](./assests/Screenshot 2025-06-28 182722.png)
