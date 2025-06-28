@@ -39,7 +39,7 @@ A simple Flask app to classify movie review sentiment (positive/negative) using 
     ```
 ## Project Structure
 ```
-news-sentiment-classifier/
+🎬 Movie Review Sentiment Classifier/
 │
 ├── assets/
 │   └── app_screenshot.png         # Screenshot of the Flask app
