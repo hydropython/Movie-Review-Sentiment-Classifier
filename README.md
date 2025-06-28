@@ -41,21 +41,24 @@ A simple Flask app to classify news headline sentiment (positive/negative) using
 ```
 news-sentiment-classifier/
 │
+├── assets/
+│   └── app_screenshot.png         # Screenshot of the Flask app
+│
 ├── data/
-│   └── news_sentiment.csv           # Dataset with 'review' & 'sentiment' columns
+│   └── news_sentiment.csv         # Dataset with 'review' & 'sentiment' columns
 │
 ├── model/
-│   ├── logistic_regression.pkl     # Saved Logistic Regression model
-│   ├── naive_bayes.pkl             # Saved Naive Bayes model
-│   ├── random_forest.pkl           # Saved Random Forest model
-│   ├── linear_svc.pkl              # Saved Linear SVC model
-│   └── vectorizer.pkl              # TF-IDF vectorizer (or multiple vectorizers if separate)
+│   ├── logistic_regression.pkl    # Saved Logistic Regression model
+│   ├── naive_bayes.pkl            # Saved Naive Bayes model
+│   ├── random_forest.pkl          # Saved Random Forest model
+│   ├── linear_svc.pkl             # Saved Linear SVC model
+│   └── vectorizer.pkl             # TF-IDF vectorizer
 │
 ├── src/
-│   ├── train.py                   # Training script (load data, train models, save models/vectorizer)
+│   ├── train.py                   # Training script
 │   ├── predict.py                 # CLI prediction script
 │   ├── app.py                     # Flask app with UI & API
-│   └── prepare.py                 # (Optional) Data cleaning, preprocessing utilities
+│   └── prepare.py                 # Data cleaning/preprocessing utils
 │
 ├── requirements.txt               # Python dependencies
 └── README.md                      # Project overview and usage
