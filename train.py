@@ -1,52 +1,56 @@
-import sys
+# train.py
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pickle
+import os
 
-MODEL_FILES = {
-    "logistic_regression": "model/logistic_regression.pkl",
-    "naive_bayes": "model/naive_bayes.pkl",
-    "random_forest": "model/random_forest.pkl",
-    "linear_svc": "model/linear_svc.pkl"
+# Sample training data (replace this with your real dataset)
+data = {
+    "text": [
+        "I love this!", "This is awful.", "Absolutely fantastic product.",
+        "Worst experience ever.", "I'm happy with the results.", "I hate it"
+    ],
+    "label": [1, 0, 1, 0, 1, 0]  # 1 = positive, 0 = negative
 }
 
-VECTORIZER_PATH = "model/vectorizer.pkl"
+df = pd.DataFrame(data)
 
-def load_model_and_vectorizer(model_key):
-    if model_key not in MODEL_FILES:
-        print(f"Model '{model_key}' not found. Available models: {list(MODEL_FILES.keys())}")
-        sys.exit(1)
-    with open(MODEL_FILES[model_key], "rb") as f:
-        model = pickle.load(f)
-    with open(VECTORIZER_PATH, "rb") as f:
-        vectorizer = pickle.load(f)
-    return model, vectorizer
+# Train-test split (optional but good practice)
+X_train, X_test, y_train, y_test = train_test_split(df["text"], df["label"], test_size=0.2, random_state=42)
 
-def main():
-    if len(sys.argv) < 3:
-        print("Usage: python predict.py <model_name> \"<your headline>\"")
-        print(f"Available models: {list(MODEL_FILES.keys())}")
-        sys.exit(1)
+# Directory to save models
+os.makedirs("model", exist_ok=True)
 
-    model_name = sys.argv[1].lower()
-    review = sys.argv[2]
+# Models dictionary
+models = {
+    "logreg": LogisticRegression(max_iter=1000),
+    "nb": MultinomialNB(),
+    "rf": RandomForestClassifier(n_estimators=100),
+    "svc": LinearSVC(max_iter=1000)
+}
 
-    model, vectorizer = load_model_and_vectorizer(model_name)
-    X_vec = vectorizer.transform([review])
+for name, model in models.items():
+    print(f"Training {name}...")
 
-    # For RandomForest and other classifiers without predict_proba, handle carefully
-    try:
-        confidence = model.predict_proba(X_vec).max()
-    except AttributeError:
-        confidence = None  # SVC or others may not have predict_proba
-    
-    prediction = model.predict(X_vec)[0]
-    label = "positive" if prediction == 1 else "negative"
+    # Fit a fresh vectorizer for each model (to ensure matching features)
+    vectorizer = TfidfVectorizer(max_features=5000)
+    X_train_vec = vectorizer.fit_transform(X_train)
 
-    if confidence is not None:
-        print(f"{label} ({confidence:.2f})")
-    else:
-        print(f"{label} (confidence not available)")
+    # Train model
+    model.fit(X_train_vec, y_train)
 
-if __name__ == "__main__":
-    main()
+    # Save model
+    with open(f"model/{name}_model.pkl", "wb") as f:
+        pickle.dump(model, f)
 
+    # Save vectorizer separately for this model
+    with open(f"model/vectorizer_{name}.pkl", "wb") as f:
+        pickle.dump(vectorizer, f)
+
+print("All models and vectorizers saved successfully.")
 
