@@ -23,17 +23,17 @@ A simple Flask app to classify news headline sentiment (positive/negative) using
 2. Train models
 
    ```bash
-   python train.py
+   python src/train.py
    ```
 3. Predict 
 
    ```bash
-   python predict.py logistic_regression "I loved this movie!"
+   python src/predict.py logistic_regression "I loved this movie!"
    ```
 4. Run the Flask app:
 
    ```bash
-    python app.py
+    python src/app.py
     ```
 ## Project Structure
 ```
